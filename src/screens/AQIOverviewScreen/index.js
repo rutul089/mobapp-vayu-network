@@ -19,6 +19,17 @@ class AQIOverviewScreen extends Component {
       <>
         <AQI_Overview_Component
           handleBroadcastIconPress={this.handleBroadcastIconPress}
+          pollutantsData={[
+            { name: 'PM2.5', value: 28, color: '#3EB049' },
+            { name: 'PM10', value: 61, color: '#FFD600' },
+            { name: 'SO2', value: 8, color: '#3EB049' },
+            { name: 'CO', value: 56, color: '#3EB049' },
+            { name: 'O3', value: 15, color: '#3EB049' },
+            { name: 'TVOC', value: 56, color: '#3EB049' },
+          ]}
+          tempValue={20}
+          humidityValue="50"
+          aqiValue={120}
         />
       </>
     );

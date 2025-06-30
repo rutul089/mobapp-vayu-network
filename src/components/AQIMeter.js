@@ -5,7 +5,7 @@ import { Text } from './';
 import { RadialSlider } from './AQIGauge';
 
 const AQIMeter = ({
-  value = 300,
+  value = 0,
   radius = 110,
   min = 0,
   max = 300,

@@ -24,7 +24,7 @@ const Stack = ({
   justifyContent,
   alignItems,
   style,
-  backgroundColor = theme.colors.white,
+  backgroundColor,
   ...rest
 }) => {
   const childrenArray = React.Children.toArray(children);

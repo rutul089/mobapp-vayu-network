@@ -2,7 +2,7 @@
 // @ts-nocheck
 
 import React from 'react';
-import { Text as RNText, StyleSheet } from 'react-native';
+import { Text as IText, StyleSheet } from 'react-native';
 import { theme } from '../theme';
 import {
   computeFontFamily,
@@ -61,20 +61,13 @@ const Text = ({
   apfelGrotezkSatt,
   ...rest
 }) => {
-  if (
-    children === undefined ||
-    children === null ||
-    (typeof children === 'string' && children.trim() === '')
-  ) {
-    return null;
-  }
-
+  const isValidJSX = React.isValidElement(children);
   const computedFontSize = computeFontSize(size);
   const computedFontFamily = computeFontFamily(fontFamily);
   const computedFontWeight = computeFontWeight(weight);
   const computedLineHeight = computeFontLineHeight(lineHeight);
 
-  const getTextTypeStyle = type => {
+  const getTextComputedStyles = type => {
     switch (type) {
       case 'helper-text':
         return styles.helperText;
@@ -95,16 +88,34 @@ const Text = ({
     }
   };
 
-  const dynamicStyles = {
-    fontSize: computedFontSize ?? theme.typography.fontSizes.body,
+  const getAdditionalComputedStyles = (size, weight, color, fontFamily) => {
+    const additionalStyles = {};
+    if (size) additionalStyles.fontSize = size;
+    if (weight) additionalStyles.fontWeight = weight;
+    if (color) additionalStyles.color = color;
+    if (fontFamily) additionalStyles.fontFamily = fontFamily;
+    return additionalStyles;
+  };
+
+  const computedStyles = getTextComputedStyles(type);
+
+  const defaultTextStyle = {
     fontFamily:
       computedFontFamily ?? theme.typography.fonts.apfelGrotezkRegular,
-    fontWeight: computedFontWeight,
+    fontSize: computedFontSize ?? theme.typography.fontSizes.body,
     color: color ?? theme.colors.textPrimary,
-    lineHeight: computedLineHeight ?? theme.typography.lineHeights.body,
+    fontWeight: computedFontWeight,
+    lineHeight: computedLineHeight,
     textAlign,
     margin: margin ?? 0,
   };
+
+  const additionalComputedStyles = getAdditionalComputedStyles(
+    computedFontSize,
+    computedFontWeight,
+    color,
+    computedFontFamily,
+  );
 
   const fontVariants = {
     ...(apfelGrotezkBrukt && theme.typography.fontStyles.apfelGrotezkBrukt),
@@ -115,15 +126,31 @@ const Text = ({
   };
 
   return (
-    <RNText
-      {...rest}
-      numberOfLines={numberOfLines}
-      ellipsizeMode={ellipsizeMode}
-      adjustsFontSizeToFit={adjustsFontSizeToFit}
-      style={[dynamicStyles, getTextTypeStyle(type), fontVariants, style]}
-    >
-      {children}
-    </RNText>
+    <>
+      {children && isValidJSX ? (
+        children
+      ) : children !== undefined &&
+        children !== null &&
+        (typeof children === 'string'
+          ? children.trim() !== ''
+          : children !== '') ? (
+        <IText
+          {...rest}
+          numberOfLines={numberOfLines}
+          ellipsizeMode={ellipsizeMode}
+          adjustsFontSizeToFit={adjustsFontSizeToFit}
+          style={[
+            defaultTextStyle,
+            computedStyles,
+            additionalComputedStyles,
+            fontVariants,
+            style,
+          ]}
+        >
+          {children}
+        </IText>
+      ) : null}
+    </>
   );
 };
 

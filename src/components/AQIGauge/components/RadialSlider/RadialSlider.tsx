@@ -48,7 +48,7 @@ const RadialSlider = (props: RadialSliderProps & typeof defaultProps) => {
     rightIconStyle,
     stroke,
     customButtonLayout,
-    customCenterLayout
+    customCenterLayout,
   } = props;
 
   const { panResponder, value, setValue, curPoint, currentRadian, prevValue } =
@@ -134,14 +134,16 @@ const RadialSlider = (props: RadialSliderProps & typeof defaultProps) => {
       onLayout={onLayout}
       ref={containerRef as any}
       style={[styles.container, style, { width: svgSize, height: svgSize }]}
-      testID="slider-view">
+      testID="slider-view"
+    >
       <Svg
         width={svgSize + markerLineSize / 2 - (Platform.OS === 'web' ? 20 : 0)}
         height={svgSize + markerLineSize / 2}
         viewBox={`-${markerLineSize / 2} -${markerLineSize / 2} ${
           svgSize + markerLineSize
         } ${svgSize + markerLineSize}`}
-        preserveAspectRatio="none">
+        preserveAspectRatio="none"
+      >
         <Defs>
           <LinearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="gradient">
             {linearGradient?.map(
@@ -150,10 +152,10 @@ const RadialSlider = (props: RadialSliderProps & typeof defaultProps) => {
                   offset: NumberProp | undefined;
                   color: string | undefined;
                 },
-                index: React.Key | null | undefined
+                index: React.Key | null | undefined,
               ) => (
                 <Stop key={index} offset={item.offset} stopColor={item.color} />
-              )
+              ),
             )}
           </LinearGradient>
         </Defs>
@@ -197,9 +199,7 @@ const RadialSlider = (props: RadialSliderProps & typeof defaultProps) => {
         {/* Button Content */}
         {!isRadialCircleVariant && !isHideButtons && (
           <View style={[styles.buttonsWrapper, buttonContainerStyle]}>
-            <View style={styles.center}>
-              {customButtonLayout}
-            </View>
+            <View style={styles.center}>{customButtonLayout}</View>
           </View>
         )}
       </View>

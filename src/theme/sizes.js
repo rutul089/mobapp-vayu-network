@@ -33,6 +33,7 @@ export const borderRadius = {
   xxl: 32,
   xxs: 2,
   xxxl: 48,
+  card: 18,
 };
 
 const sizes = {

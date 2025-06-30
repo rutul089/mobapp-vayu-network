@@ -37,6 +37,7 @@ export const BackgroundColors = {
   background: '#F6F8FA',
   background2: '#FFFFFF',
   background3: '#F9F9F9',
+  background4: '#FAFAFA',
 };
 
 export const TextColors = {
@@ -53,6 +54,11 @@ export const statusColor = {
   success: '#5FC52E',
 };
 
+export const borderColor = {
+  borderColor: '#EFEFEF',
+  borderColor1: '#E5E5E5',
+};
+
 // Combined Colors
 const colors = {
   ...PrimaryColors,
@@ -62,6 +68,7 @@ const colors = {
   ...BackgroundColors,
   ...TextColors,
   ...statusColor,
+  ...borderColor,
   inputBorder: 'rgba(0, 0, 0, 0.12)',
   yellow: '#FFE100',
   gray: '#6c6c6c',

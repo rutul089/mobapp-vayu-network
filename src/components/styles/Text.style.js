@@ -38,7 +38,7 @@ export const styles = StyleSheet.create({
     fontSize: theme.typography.fontSizes.small,
   },
   captionText: {
-    color: theme.colors.textLabel,
+    color: theme.colors.textSecondary,
     fontWeight: theme.typography.fontWeights.normal,
     fontSize: theme.typography.fontSizes.caption,
   },

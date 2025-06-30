@@ -4,3 +4,4 @@ export { default as SafeAreaWrapper } from './SafeAreaWrapper';
 export { default as Stack } from './Stack';
 export { default as Pressable } from './Pressable';
 export { default as AQIMeter } from './AQIMeter';
+export { default as Card } from './Card';
