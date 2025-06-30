@@ -5,4 +5,12 @@ export default {
   google_icon: require('./google_icon.png'),
   gradient_fade: require('./gradient_fade.png'),
   dummy_map: require('./dummy_map.png'),
+  icon_cloud: require('./icon_cloud.png'),
+  icon_broadcasting: require('./icon_broadcasting.png'),
+  icon_attachment: require('./icon_attachment.png'),
+  icon_information: require('./icon_information.png'),
+  icon_leaf: require('./icon_leaf.png'),
+  icon_sent: require('./icon_sent.png'),
+  icon_temperature: require('./icon_temperature.png'),
+  icon_online: require('./icon_online.png'),
 };

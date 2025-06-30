@@ -30,7 +30,7 @@ const lineHeights = {
 };
 
 const fontSizes = {
-  h1: 32,
+  h1: 38,
   h2: 24,
   h3: 20,
   h4: 18,
