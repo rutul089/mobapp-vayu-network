@@ -1,0 +1,25 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/ApfelGrotezk-Brukt.otf",
+      "sha1": "1a1274d554f71c4cdc292f8c8437b634c578bd41"
+    },
+    {
+      "path": "src/assets/fonts/ApfelGrotezk-Fett.otf",
+      "sha1": "bd63781b68e3e5c31370bbe0c1b2a26e87294d5e"
+    },
+    {
+      "path": "src/assets/fonts/ApfelGrotezk-Mittel.otf",
+      "sha1": "f13516625a444ac97c726c994b68bebe111e66d8"
+    },
+    {
+      "path": "src/assets/fonts/ApfelGrotezk-Regular.otf",
+      "sha1": "50e905bf3a188b134ca78a0d7230b8436a14311b"
+    },
+    {
+      "path": "src/assets/fonts/ApfelGrotezk-Satt.otf",
+      "sha1": "8df0fcc19cde952d5c462550ddbad8c4348521f1"
+    }
+  ]
+}

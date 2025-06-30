@@ -12,6 +12,11 @@
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		82B6536416CDD049AB62E4DF /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
+		FA5F5C426B404D4CA682D663 /* ApfelGrotezk-Brukt.otf in Resources */ = {isa = PBXBuildFile; fileRef = D5F7A47DCCF7409EBC39B9D4 /* ApfelGrotezk-Brukt.otf */; };
+		11A348ABAB524A9E9E95267A /* ApfelGrotezk-Fett.otf in Resources */ = {isa = PBXBuildFile; fileRef = 1A2E99201D144E0B94AB06EF /* ApfelGrotezk-Fett.otf */; };
+		71FEE73C3BEB401CA2744041 /* ApfelGrotezk-Mittel.otf in Resources */ = {isa = PBXBuildFile; fileRef = 04037C4D92194FB48D90835D /* ApfelGrotezk-Mittel.otf */; };
+		4F9C3EE18EF54AD987A4FB2F /* ApfelGrotezk-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 1416034ED3B24381B0E74573 /* ApfelGrotezk-Regular.otf */; };
+		B932DCAFC559460CA68AF643 /* ApfelGrotezk-Satt.otf in Resources */ = {isa = PBXBuildFile; fileRef = E16A6C0E467647A49D4F0E41 /* ApfelGrotezk-Satt.otf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +30,11 @@
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = vayu_network/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = vayu_network/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		D5F7A47DCCF7409EBC39B9D4 /* ApfelGrotezk-Brukt.otf */ = {isa = PBXFileReference; name = "ApfelGrotezk-Brukt.otf"; path = "../src/assets/fonts/ApfelGrotezk-Brukt.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		1A2E99201D144E0B94AB06EF /* ApfelGrotezk-Fett.otf */ = {isa = PBXFileReference; name = "ApfelGrotezk-Fett.otf"; path = "../src/assets/fonts/ApfelGrotezk-Fett.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		04037C4D92194FB48D90835D /* ApfelGrotezk-Mittel.otf */ = {isa = PBXFileReference; name = "ApfelGrotezk-Mittel.otf"; path = "../src/assets/fonts/ApfelGrotezk-Mittel.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		1416034ED3B24381B0E74573 /* ApfelGrotezk-Regular.otf */ = {isa = PBXFileReference; name = "ApfelGrotezk-Regular.otf"; path = "../src/assets/fonts/ApfelGrotezk-Regular.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		E16A6C0E467647A49D4F0E41 /* ApfelGrotezk-Satt.otf */ = {isa = PBXFileReference; name = "ApfelGrotezk-Satt.otf"; path = "../src/assets/fonts/ApfelGrotezk-Satt.otf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +85,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				A2E3E14B4ACE4D2E93DA7C3E /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -97,6 +108,19 @@
 			);
 			path = Pods;
 			sourceTree = "<group>";
+		};
+		A2E3E14B4ACE4D2E93DA7C3E /* Resources */ = {
+			isa = "PBXGroup";
+			children = (
+				D5F7A47DCCF7409EBC39B9D4 /* ApfelGrotezk-Brukt.otf */,
+				1A2E99201D144E0B94AB06EF /* ApfelGrotezk-Fett.otf */,
+				04037C4D92194FB48D90835D /* ApfelGrotezk-Mittel.otf */,
+				1416034ED3B24381B0E74573 /* ApfelGrotezk-Regular.otf */,
+				E16A6C0E467647A49D4F0E41 /* ApfelGrotezk-Satt.otf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+			path = "";
 		};
 /* End PBXGroup section */
 
@@ -161,6 +185,11 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				82B6536416CDD049AB62E4DF /* PrivacyInfo.xcprivacy in Resources */,
+				FA5F5C426B404D4CA682D663 /* ApfelGrotezk-Brukt.otf in Resources */,
+				11A348ABAB524A9E9E95267A /* ApfelGrotezk-Fett.otf in Resources */,
+				71FEE73C3BEB401CA2744041 /* ApfelGrotezk-Mittel.otf in Resources */,
+				4F9C3EE18EF54AD987A4FB2F /* ApfelGrotezk-Regular.otf in Resources */,
+				B932DCAFC559460CA68AF643 /* ApfelGrotezk-Satt.otf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -376,7 +405,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -445,7 +477,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

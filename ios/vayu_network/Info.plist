@@ -32,7 +32,7 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -53,5 +53,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>ApfelGrotezk-Brukt.otf</string>
+		<string>ApfelGrotezk-Fett.otf</string>
+		<string>ApfelGrotezk-Mittel.otf</string>
+		<string>ApfelGrotezk-Regular.otf</string>
+		<string>ApfelGrotezk-Satt.otf</string>
+	</array>
 </dict>
 </plist>
