@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, ImageBackground, Image } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ImageBackground,
+  Image,
+  StatusBar,
+} from 'react-native';
 import theme from '../../theme';
 import images from '../../assets/images';
 import { Button } from '../../components';

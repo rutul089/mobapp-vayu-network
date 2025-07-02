@@ -17,7 +17,7 @@ export const icons = {
   sm: 16,
   xl: 30,
   xs: 12,
-  xxl: 48,
+  xxl: 45,
   xxs: 8,
   xxxl: 64,
 };

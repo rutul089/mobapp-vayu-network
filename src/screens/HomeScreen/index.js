@@ -10,7 +10,8 @@ export default class HomeScreen extends Component {
   }
 
   onPress = () => {
-    navigate(ScreenNames.AQIOverview);
+    navigate(ScreenNames.AQIInsight);
+    // navigate(ScreenNames.AQIOverview);
   };
 
   render() {

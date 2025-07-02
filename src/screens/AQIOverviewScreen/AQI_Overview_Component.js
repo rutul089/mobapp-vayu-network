@@ -5,6 +5,8 @@ import images from '../../assets/images';
 import {
   AQIMeter,
   Card,
+  PollutantItem,
+  PollutantsGrid,
   Pressable,
   SafeAreaWrapper,
   Stack,
@@ -102,18 +104,24 @@ const PollutantsDetail = ({ pollutantsData }) => {
       <View style={styles.divider} />
       <View style={styles.pollutantsGrid}>
         {pollutantsData?.map((item, index) => (
-          <View key={index} style={styles.pollutantItem}>
-            <Text color={theme.colors.textSecondary}>{item.name}</Text>
-            <View
-              style={[styles.pollutantLine, { backgroundColor: item.color }]}
-            />
-            <Text
-              apfelGrotezkMittel
-              weight={theme.typography.fontWeights.medium}
-            >
-              {String(item.value).padStart(2, '0')}
-            </Text>
-          </View>
+          <PollutantItem
+            name={item.name}
+            value={item.value}
+            color={item.color}
+            key={index}
+          />
+          // <View key={index} style={styles.pollutantItem}>
+          //   <Text color={theme.colors.textSecondary}>{item.name}</Text>
+          //   <View
+          //     style={[styles.pollutantLine, { backgroundColor: item.color }]}
+          //   />
+          //   <Text
+          //     apfelGrotezkMittel
+          //     weight={theme.typography.fontWeights.medium}
+          //   >
+          //     {String(item.value).padStart(2, '0')}
+          //   </Text>
+          // </View>
         ))}
       </View>
     </Card>
@@ -189,7 +197,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   iconImage: {
     height: theme.sizes.icons.md,
@@ -213,7 +221,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     paddingHorizontal: 15,
-    paddingVertical: 12,
+    paddingTop: 12,
   },
   pollutantItem: {
     width: '48%',
@@ -229,8 +237,9 @@ const styles = StyleSheet.create({
   pollutantLine: {
     flex: 1,
     height: 3,
-    marginHorizontal: 15,
+    marginHorizontal: 10,
     borderRadius: 10,
+    // marginHorizontal: 4,
   },
 });
 

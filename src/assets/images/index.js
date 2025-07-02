@@ -13,4 +13,6 @@ export default {
   icon_sent: require('./icon_sent.png'),
   icon_temperature: require('./icon_temperature.png'),
   icon_online: require('./icon_online.png'),
+  icon_back: require('./icon_back.png'),
+  dummy_graph: require('./dummy_graph.png'),
 };
