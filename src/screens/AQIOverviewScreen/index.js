@@ -29,7 +29,7 @@ class AQIOverviewScreen extends Component {
           ]}
           tempValue={20}
           humidityValue="50"
-          aqiValue={120}
+          aqiValue={200}
         />
       </>
     );

@@ -30,7 +30,7 @@ const AQI_Overview_Component = ({
         <Stack gap={24}>
           <Header onBroadcastPress={handleBroadcastIconPress} />
           <View style={styles.aqiMeterWrapper}>
-            <AQIMeter value={aqiValue} />
+            <AQIMeter value={aqiValue} max={300} />
           </View>
           <View style={styles.cardsRow}>
             <AQICard

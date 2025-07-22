@@ -61,5 +61,9 @@
 		<string>ApfelGrotezk-Regular.otf</string>
 		<string>ApfelGrotezk-Satt.otf</string>
 	</array>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>We use Bluetooth to connect to AQI devices.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>We use Bluetooth to connect to AQI devices.</string>
 </dict>
 </plist>
