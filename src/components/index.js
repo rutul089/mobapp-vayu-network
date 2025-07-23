@@ -8,3 +8,4 @@ export { default as Card } from './Card';
 export { default as PollutantItem } from './PollutantItem';
 export { default as PollutantsGrid } from './PollutantsGrid';
 export { default as Spacing } from './Spacing';
+export { default as DeviceCard } from './DeviceCard';

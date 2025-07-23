@@ -42,6 +42,7 @@ class AQIInsightScreen extends Component {
   }
 
   async componentDidMount() {
+    return;
     try {
       await this.ble.scanAndConnect();
 
@@ -115,26 +116,6 @@ class AQIInsightScreen extends Component {
       Alert.alert('Write Error', 'Could not write value');
     }
   };
-
-  // handleRead = async label => {
-  //   try {
-  //     const uuid = this.getUuidFromLabel(label);
-  //     const value = await BleService.readValue(uuid);
-  //     Alert.alert(`${label} (Read)`, `${value}`);
-  //   } catch (err) {
-  //     console.log('Read error:', err);
-  //   }
-  // };
-
-  // handleWrite = async label => {
-  //   try {
-  //     const uuid = this.getUuidFromLabel(label);
-  //     await BleService.writeValue(uuid, 42.0); // write dummy value
-  //     Alert.alert(`${label}`, 'Value written: 42.0');
-  //   } catch (err) {
-  //     console.log('Write error:', err);
-  //   }
-  // };
 
   onBackHandlePress = () => {
     goBack();

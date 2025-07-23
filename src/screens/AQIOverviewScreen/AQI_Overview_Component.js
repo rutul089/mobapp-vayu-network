@@ -80,13 +80,17 @@ const AQICard = ({ icon, label, value }) => (
     style={styles.card}
     cardContainerStyle={styles.cardContainer}
   >
-    <View style={styles.iconWrapper}>
-      <Image source={icon} resizeMode="contain" style={styles.iconImage} />
+    <View style={{ flexDirection: 'row' }}>
+      <View style={styles.iconWrapper}>
+        <Image source={icon} resizeMode="contain" style={styles.iconImage} />
+      </View>
+      <View style={{ marginHorizontal: 15 }}>
+        <Text type="caption" size="small">
+          {label}
+        </Text>
+        <Text size="h2">{value}</Text>
+      </View>
     </View>
-    <Text type="caption" size="small">
-      {label}
-    </Text>
-    <Text size="h1">{value}</Text>
   </Card>
 );
 
@@ -163,8 +167,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   aqiMeterWrapper: {
-    marginTop: 15,
-    top: 15,
+    marginTop: -24,
+    top: 24,
   },
   cardsRow: {
     flexDirection: 'row',
@@ -197,7 +201,6 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
   },
   iconImage: {
     height: theme.sizes.icons.md,

@@ -1,128 +1,28 @@
-// import { BleManager } from 'react-native-ble-plx';
-// import { Buffer } from 'buffer';
-
-// class BleService {
-//   constructor() {
-//     this.manager = new BleManager();
-//     this.device = null;
-//     this.characteristics = {}; // Store characteristic objects
-//   }
-
-//   /**
-//    * Scan and connect to the BLE device
-//    * @param {Function} onDataReceived Callback(uuid, value)
-//    */
-//   async scanAndConnect(onDataReceived) {
-//     return new Promise((resolve, reject) => {
-//       console.log('Start scanning...');
-//       this.manager.startDeviceScan(null, null, async (error, device) => {
-//         if (error) {
-//           console.log('Scan error:', error);
-//           reject(error);
-//           return;
-//         }
-//         console.log('device--->', device.name, device.id);
-//         // Match your device by name (Vayu_AQI_Monitor)
-//         if (device && device.id === 'EF:70:CE:86:8B:9B') {
-//           console.log('Found device:', device.name);
-//           this.manager.stopDeviceScan();
-
-//           try {
-//             this.device = await device.connect();
-//             console.log('Connected');
-
-//             await this.device.discoverAllServicesAndCharacteristics();
-//             console.log('Discovered services & characteristics');
-
-//             const services = await this.device.services();
-
-//             for (let service of services) {
-//               const chars = await service.characteristics();
-//               for (let char of chars) {
-//                 this.characteristics[char.uuid] = char;
-//                 console.log('Characteristic found:', char.uuid);
-//                 console.log('char', char);
-//                 // Subscribe to notifications
-//                 if (char.isNotifiable) {
-//                   console.log('0000000');
-//                   char.monitor((error, characteristic) => {
-//                     if (error) {
-//                       console.log('Notify error:', error);
-//                       return;
-//                     }
-//                     console.log('0000000');
-//                     const value = this.parseData(characteristic.value);
-//                     console.log(`Notification from ${char.uuid}:`, value);
-//                     onDataReceived && onDataReceived(char.uuid, value);
-//                   });
-//                 }
-//               }
-//             }
-
-//             resolve(this.device);
-//           } catch (err) {
-//             console.log('Connection error:', err);
-//             reject(err);
-//           }
-//         }
-//       });
-//     });
-//   }
-
-//   /**
-//    * Read value from a characteristic
-//    * @param {string} uuid characteristic UUID
-//    */
-//   async readValue(uuid) {
-//     if (!this.characteristics[uuid])
-//       throw new Error('Characteristic not found');
-//     const char = await this.characteristics[uuid].read();
-//     return this.parseData(char.value);
-//   }
-
-//   /**
-//    * Write a float value to characteristic
-//    * @param {string} uuid characteristic UUID
-//    * @param {number} floatValue
-//    */
-//   async writeValue(uuid, floatValue) {
-//     if (!this.characteristics[uuid])
-//       throw new Error('Characteristic not found');
-//     const buffer = Buffer.alloc(4);
-//     buffer.writeFloatLE(floatValue, 0);
-//     const base64 = buffer.toString('base64');
-//     await this.characteristics[uuid].writeWithResponse(base64);
-//     console.log(`Wrote ${floatValue} to ${uuid}`);
-//   }
-
-//   /**
-//    * Parse BLE base64 value → float
-//    */
-//   parseData(base64Value) {
-//     if (!base64Value) return null;
-//     const buffer = Buffer.from(base64Value, 'base64');
-//     return buffer.readFloatLE(0);
-//   }
-
-//   disconnect() {
-//     if (this.device) {
-//       this.device.cancelConnection().catch(console.log);
-//     }
-//   }
-// }
-
-// export default new BleService();
-
-// ble/BleService.js
 import { BleManager } from 'react-native-ble-plx';
-import { PermissionsAndroid, Platform } from 'react-native';
+import { Platform, PermissionsAndroid, Alert } from 'react-native';
 import { decode as atob } from 'base-64';
 
-export default class BLEService {
+class BLESingleton {
+  static instance = null;
+
+  static getInstance() {
+    if (!BLESingleton.instance) {
+      BLESingleton.instance = new BLESingleton();
+    }
+    return BLESingleton.instance;
+  }
+
   constructor() {
     this.manager = new BleManager();
     this.device = null;
     this.characteristics = {};
+    this.disconnectSubscription = null;
+    this.lastConnectedDeviceId = null;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 5;
+    this.listeners = {}; // { temperature: { subscription, callback }, ... }
+    this.onReconnectStatusChange = null;
+    this.onDisconnectCallback = null;
   }
 
   async requestPermissions() {
@@ -135,40 +35,126 @@ export default class BLEService {
     }
   }
 
-  async scanAndConnect() {
+  async scanForDevicesWithPrefix(prefix = 'Vayu_AQ', timeout = 5000) {
     await this.requestPermissions();
 
     return new Promise((resolve, reject) => {
-      this.manager.startDeviceScan(null, null, async (error, device) => {
-        if (error) return reject(error);
-        if (device.id === 'FB:E9:B7:B2:2A:A9') {
-          this.manager.stopDeviceScan();
-          console.log('---->Connected');
+      const filteredDevices = [];
 
-          try {
-            const connected = await device.connect();
-            await connected.discoverAllServicesAndCharacteristics();
-            this.device = connected;
+      this.manager.startDeviceScan(null, null, (error, device) => {
+        if (error) {
+          reject(error);
+          return;
+        }
 
-            const services = await connected.services();
-            for (const service of services) {
-              const chars = await service.characteristics();
-              console.log('chars', chars);
-              for (const c of chars) {
-                this.characteristics[c.uuid.toLowerCase()] = c;
-              }
-            }
-
-            resolve();
-          } catch (err) {
-            reject(err);
+        if (device?.name?.startsWith(prefix)) {
+          if (!filteredDevices.find(d => d.id === device.id)) {
+            filteredDevices.push(device);
           }
         }
       });
+
+      setTimeout(() => {
+        this.manager.stopDeviceScan();
+        resolve(filteredDevices);
+      }, timeout);
     });
   }
 
-  // Helper to get 16-bit UUID mapping
+  async connectToDevice(device) {
+    try {
+      this.device = await this.manager.connectToDevice(device.id, {
+        autoConnect: true,
+      });
+      this.lastConnectedDeviceId = device.id;
+
+      await this.device.discoverAllServicesAndCharacteristics();
+
+      const services = await this.device.services();
+      for (const service of services) {
+        const chars = await service.characteristics();
+        for (const c of chars) {
+          this.characteristics[c.uuid.toLowerCase()] = c;
+        }
+      }
+
+      console.log('Connected to:', this.device.name);
+      this.setupDisconnectListener();
+    } catch (error) {
+      console.log('Connection error:', error.message);
+      Alert.alert('Connection Failed', error.message);
+      throw error;
+    }
+  }
+
+  setupDisconnectListener() {
+    if (this.disconnectSubscription) {
+      this.disconnectSubscription.remove();
+    }
+
+    this.disconnectSubscription = this.device.onDisconnected(
+      async (error, device) => {
+        console.log('Device disconnected:', device.id);
+        Alert.alert('Device Disconnected', 'Attempting to reconnect...');
+        this.reconnectAttempts = 0;
+        this.autoReconnect(device.id);
+      },
+    );
+  }
+
+  async autoReconnect(deviceId) {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      Alert.alert(
+        'Reconnect Failed',
+        'Unable to reconnect after multiple attempts.',
+      );
+      return;
+    }
+
+    try {
+      this.reconnectAttempts++;
+      console.log(`Reconnect attempt ${this.reconnectAttempts}`);
+      const device = await this.manager.connectToDevice(deviceId, {
+        autoConnect: true,
+      });
+      this.device = device;
+      await this.device.discoverAllServicesAndCharacteristics();
+
+      const services = await this.device.services();
+      for (const service of services) {
+        const chars = await service.characteristics();
+        for (const c of chars) {
+          this.characteristics[c.uuid.toLowerCase()] = c;
+        }
+      }
+
+      console.log('Reconnected to:', device.name);
+      Alert.alert('Reconnected', `Successfully reconnected to ${device.name}`);
+      this.setupDisconnectListener();
+      this.reconnectAttempts = 0;
+
+      // ✅ Auto-resubscribe to all previous listeners
+      this.resubscribeAll();
+    } catch (err) {
+      console.log('Reconnect failed:', err.message);
+      setTimeout(() => this.autoReconnect(deviceId), 3000);
+    }
+  }
+
+  resubscribeAll() {
+    const keys = Object.keys(this.listeners);
+    if (!keys.length) return;
+
+    console.log('Resubscribing to:', keys.join(', '));
+
+    keys.forEach(characteristicName => {
+      const { callback } = this.listeners[characteristicName];
+      if (callback) {
+        this.listenTo(characteristicName, callback);
+      }
+    });
+  }
+
   getUuidMap() {
     return {
       temperature: '2a6e',
@@ -183,7 +169,6 @@ export default class BLEService {
     };
   }
 
-  // Listen to float notifications
   listenTo(characteristicName, callback) {
     const uuidMap = this.getUuidMap();
     const shortUuid = uuidMap[characteristicName];
@@ -198,27 +183,40 @@ export default class BLEService {
     );
 
     if (!matchedUUID) {
-      console.warn('Characteristic not found for', characteristicName);
+      console.warn('Characteristic not found for:', characteristicName);
       return;
     }
 
     const characteristic = this.characteristics[matchedUUID];
 
-    characteristic.monitor((error, char) => {
+    const subscription = characteristic.monitor((error, char) => {
       if (error) {
-        console.log('Notification error:', error);
+        console.log(
+          `Notification error [${characteristicName}]:`,
+          error.message,
+        );
         return;
       }
 
       const base64Value = char.value;
       const bytes = this.base64ToBytes(base64Value);
       const floatValue = this.bytesToFloat32(bytes);
-
       callback(floatValue);
     });
+
+    // ✅ Store both subscription and callback
+    this.listeners[characteristicName] = { subscription, callback };
   }
 
-  // Base64 → Uint8Array
+  stopListeningAll() {
+    Object.values(this.listeners).forEach(({ subscription }) => {
+      if (subscription?.remove) {
+        subscription.remove();
+      }
+    });
+    this.listeners = {};
+  }
+
   base64ToBytes(base64) {
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
@@ -228,7 +226,6 @@ export default class BLEService {
     return bytes;
   }
 
-  // Uint8Array → float32
   bytesToFloat32(bytes) {
     const buffer = new ArrayBuffer(4);
     const view = new DataView(buffer);
@@ -237,10 +234,42 @@ export default class BLEService {
   }
 
   async disconnect() {
+    this.stopListeningAll();
+
     if (this.device) {
-      await this.manager.cancelDeviceConnection(this.device.id);
+      try {
+        await this.manager.cancelDeviceConnection(this.device.id);
+        console.log('Device manually disconnected');
+      } catch (e) {
+        console.log('Error during manual disconnect:', e.message);
+      }
       this.device = null;
-      this.characteristics = {};
+    }
+
+    if (this.disconnectSubscription) {
+      this.disconnectSubscription.remove();
+      this.disconnectSubscription = null;
+    }
+  }
+
+  async reconnectLastDevice() {
+    if (this.lastConnectedDeviceId) {
+      await this.connectToDevice({ id: this.lastConnectedDeviceId });
+      this.resubscribeAll(); // ✅ Also allow manual reconnect to restore listeners
+    } else {
+      Alert.alert('Reconnect Error', 'No previously connected device found.');
+    }
+  }
+
+  setReconnectStatusCallback(callback) {
+    this.onReconnectStatusChange = callback;
+  }
+
+  emitReconnectStatus(status) {
+    if (this.onReconnectStatusChange) {
+      this.onReconnectStatusChange(status);
     }
   }
 }
+
+export default BLESingleton.getInstance();

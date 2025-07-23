@@ -15,4 +15,5 @@ export default {
   icon_online: require('./icon_online.png'),
   icon_back: require('./icon_back.png'),
   dummy_graph: require('./dummy_graph.png'),
+  vayu_logo: require('./vayu_logo.png'),
 };

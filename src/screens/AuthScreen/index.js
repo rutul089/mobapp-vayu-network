@@ -10,11 +10,11 @@ class AuthScreen extends Component {
   }
 
   onGooglePress = () => {
-    navigate(ScreenNames.Home);
+    navigate(ScreenNames.BLEListing);
   };
 
   onApplePress = () => {
-    navigate(ScreenNames.Home);
+    navigate(ScreenNames.BLEListing);
   };
 
   render() {

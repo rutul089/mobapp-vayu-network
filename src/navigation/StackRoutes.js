@@ -31,6 +31,10 @@ const StackRoutes = () => {
         name={ScreenNames.AQIOverview}
         component={Screens.AQIOverviewScreen}
       />
+      <Stack.Screen
+        name={ScreenNames.BLEListing}
+        component={Screens.BLEDeviceListScreen}
+      />
     </Stack.Navigator>
   );
 };
