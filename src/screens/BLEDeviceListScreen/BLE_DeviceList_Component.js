@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, FlatList, View } from 'react-native';
+import { StyleSheet, FlatList, View, ActivityIndicator } from 'react-native';
 import {
   DeviceCard,
   SafeAreaWrapper,
@@ -9,7 +9,7 @@ import {
 } from '../../components';
 import theme from '../../theme';
 
-const BLE_DeviceList_Component = ({ devices, onDeviceSelected }) => {
+const BLE_DeviceList_Component = ({ devices, onDeviceSelected, scanning }) => {
   return (
     <SafeAreaWrapper
       backgroundColor={theme.colors.background4}
@@ -38,6 +38,11 @@ const BLE_DeviceList_Component = ({ devices, onDeviceSelected }) => {
           )}
           ItemSeparatorComponent={<Spacing />}
         />
+        {scanning && (
+          <View style={styles.loader}>
+            <ActivityIndicator size={'large'} />
+          </View>
+        )}
       </View>
     </SafeAreaWrapper>
   );
@@ -52,6 +57,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   deviceListWrapper: { flexGrow: 1, padding: theme.sizes.padding },
+  loader: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.5)',
+  },
 });
 
 export default BLE_DeviceList_Component;

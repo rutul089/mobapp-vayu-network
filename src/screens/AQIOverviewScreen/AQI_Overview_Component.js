@@ -6,7 +6,6 @@ import {
   AQIMeter,
   Card,
   PollutantItem,
-  PollutantsGrid,
   Pressable,
   SafeAreaWrapper,
   Stack,
@@ -20,6 +19,7 @@ const AQI_Overview_Component = ({
   aqiValue,
   tempValue = '-',
   humidityValue = '-',
+  connected,
 }) => {
   return (
     <SafeAreaWrapper
@@ -28,7 +28,10 @@ const AQI_Overview_Component = ({
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Stack gap={24}>
-          <Header onBroadcastPress={handleBroadcastIconPress} />
+          <Header
+            onBroadcastPress={handleBroadcastIconPress}
+            connected={connected}
+          />
           <View style={styles.aqiMeterWrapper}>
             <AQIMeter value={aqiValue} max={300} />
           </View>
@@ -52,7 +55,7 @@ const AQI_Overview_Component = ({
   );
 };
 
-const Header = ({ onBroadcastPress }) => (
+const Header = ({ onBroadcastPress, connected }) => (
   <View>
     <Text type="helper-text">Good Morning, Sohil</Text>
     <View style={styles.titleRow}>
@@ -67,8 +70,16 @@ const Header = ({ onBroadcastPress }) => (
       <Pressable
         onPress={onBroadcastPress}
         accessibilityLabel="Broadcast Icon Button"
+        style={styles.broadcastIcon}
       >
-        <Image source={images.icon_broadcasting} style={styles.broadcastIcon} />
+        <Image
+          source={
+            connected ? images.icon_disconnect : images.icon_start_broadcasting
+          }
+          style={{ height: 30, width: 30 }}
+          tintColor={'#0F9120'}
+          resizeMode="contain"
+        />
       </Pressable>
     </View>
   </View>
@@ -114,18 +125,6 @@ const PollutantsDetail = ({ pollutantsData }) => {
             color={item.color}
             key={index}
           />
-          // <View key={index} style={styles.pollutantItem}>
-          //   <Text color={theme.colors.textSecondary}>{item.name}</Text>
-          //   <View
-          //     style={[styles.pollutantLine, { backgroundColor: item.color }]}
-          //   />
-          //   <Text
-          //     apfelGrotezkMittel
-          //     weight={theme.typography.fontWeights.medium}
-          //   >
-          //     {String(item.value).padStart(2, '0')}
-          //   </Text>
-          // </View>
         ))}
       </View>
     </Card>
@@ -187,6 +186,10 @@ const styles = StyleSheet.create({
     height: 44,
     width: 44,
     resizeMode: 'contain',
+    backgroundColor: 'rgba(185, 227, 143, 0.49)',
+    borderRadius: theme.sizes.borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   card: {
     width: '48%',

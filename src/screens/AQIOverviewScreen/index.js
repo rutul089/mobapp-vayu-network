@@ -1,25 +1,15 @@
 import React, { Component } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { Alert } from 'react-native';
+import BleService, { BLESingleton } from '../../ble/BleService';
 import AQI_Overview_Component from './AQI_Overview_Component';
-import { goBack } from '../../navigation/NavigationUtils';
-import BleService from '../../ble/BleService';
 
 class AQIOverviewScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: {
-        temperature: '',
-        humidity: '',
-        pressure: '',
-        gas: '',
-        pm1: '',
-        pm25: '',
-        pm10: '',
-        eco2: '',
-        tvoc: '',
-      },
+      readings: {},
       connected: false,
+      reconnecting: false,
     };
     this._characteristicMap = [
       'temperature',
@@ -35,25 +25,61 @@ class AQIOverviewScreen extends Component {
   }
 
   async componentDidMount() {
-    this.startListening();
-    this._characteristicMap.forEach(name => {
-      this.ble.listenTo(name, value => {
-        this.setState(prev => ({
-          data: { ...prev.data, [name]: value.toFixed(2) },
-        }));
-      });
-    });
+    this.setupBLECallbacks();
+    if (
+      BleService.connectionStatus === BLESingleton.ConnectionStatus.CONNECTED
+    ) {
+      this.startReadingSensorData();
+      this.setState({ connected: true });
+    } else {
+      this.setState({ connected: false });
+    }
   }
 
-  componentWillUnmount() {
+  async componentWillUnmount() {
+    await BleService.disconnect();
     BleService.stopListeningAll();
+    BleService.setReconnectStatusCallback(null);
+    BleService.setOnDisconnectCallback(null);
+    BleService.setOnReconnectCallback(null);
   }
 
-  startListening = () => {
+  /**
+   * Sets up BLE reconnect, disconnect and reconnect status callbacks
+   */
+  setupBLECallbacks = () => {
+    BleService.setReconnectStatusCallback(isReconnecting => {
+      this.setState({ reconnecting: isReconnecting });
+    });
+
+    BleService.setOnDisconnectCallback(device => {
+      console.log('[Screen] Disconnected from:', device?.id);
+      this.setState({ connected: false });
+    });
+
+    BleService.setOnReconnectCallback(device => {
+      console.log('[Screen] Reconnected to:', device?.id);
+      this.setState({ connected: true });
+      this.startReadingSensorData();
+    });
+
+    BleService.setOnReconnectFailure(() => {
+      Alert.alert('Error', 'Failed to reconnect after 5 attempts.');
+      this.setState({ connected: false });
+    });
+  };
+
+  /**
+   * Listens to all AQI characteristic values
+   */
+  startReadingSensorData = () => {
     this._characteristicMap.forEach(name => {
-      BleService.listenTo(name, value => {
+      BleService.listenTo(name.toLowerCase(), value => {
         this.setState(prev => ({
-          data: { ...prev.data, [name]: value.toFixed(2) },
+          readings: {
+            ...prev.readings,
+            [name]: value.toFixed(2),
+          },
         }));
       });
     });
@@ -61,8 +87,13 @@ class AQIOverviewScreen extends Component {
   };
 
   handleBroadcastIconPress = () => {
-    goBack();
-    Alert.alert('TODO : Implement logic for handleBroadcastIconPress');
+    //Implement logic for handleBroadcastIconPress
+    const { connected } = this.state;
+    if (connected) {
+      this.handleDisconnect();
+    } else {
+      this.handleReconnect();
+    }
   };
 
   handleDisconnect = async () => {
@@ -74,7 +105,6 @@ class AQIOverviewScreen extends Component {
   handleReconnect = async () => {
     try {
       await BleService.reconnectLastDevice();
-      this.startListening();
       Alert.alert('Reconnected', 'Device reconnected successfully.');
     } catch (error) {
       Alert.alert('Reconnect Failed', error.message);
@@ -82,24 +112,23 @@ class AQIOverviewScreen extends Component {
   };
 
   render() {
-    const { data } = this.state;
-
-    console.log('12312312312123', JSON.stringify(data));
+    const { readings, reconnecting, connected } = this.state;
     return (
       <>
         <AQI_Overview_Component
           handleBroadcastIconPress={this.handleBroadcastIconPress}
           pollutantsData={[
-            { name: 'PM2.5', value: data['pm25'], color: '#3EB049' },
-            { name: 'PM10', value: data['pm10'], color: '#FFD600' },
-            { name: 'PM1', value: data['pm1'], color: '#3EB049' },
-            { name: 'GAS', value: data['gas'], color: '#3EB049' },
-            { name: 'eco2', value: data['eco2'], color: '#3EB049' },
-            { name: 'TVOC', value: data['tvoc'], color: '#3EB049' },
+            { name: 'PM2.5', value: readings['pm25'] || '0', color: '#3EB049' },
+            { name: 'PM10', value: readings['pm10'] || '0', color: '#FFD600' },
+            { name: 'PM1', value: readings['pm1'] || '0', color: '#3EB049' },
+            { name: 'GAS', value: readings['gas'] || '0', color: '#3EB049' },
+            { name: 'eco2', value: readings['eco2'] || '0', color: '#3EB049' },
+            { name: 'TVOC', value: readings['tvoc'] || '0', color: '#3EB049' },
           ]}
-          tempValue={data['temperature']}
-          humidityValue={data['humidity']}
+          tempValue={readings['temperature']}
+          humidityValue={readings['humidity']}
           aqiValue={200}
+          connected={connected}
         />
       </>
     );

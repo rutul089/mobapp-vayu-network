@@ -1,9 +1,17 @@
-import { BleManager } from 'react-native-ble-plx';
-import { Platform, PermissionsAndroid, Alert } from 'react-native';
 import { decode as atob } from 'base-64';
+import { PermissionsAndroid, Platform } from 'react-native';
+import { BleManager } from 'react-native-ble-plx';
 
 class BLESingleton {
   static instance = null;
+
+  static ConnectionStatus = {
+    DISCONNECTED: 'disconnected',
+    CONNECTING: 'connecting',
+    CONNECTED: 'connected',
+    RECONNECTING: 'reconnecting',
+    FAILED: 'failed',
+  };
 
   static getInstance() {
     if (!BLESingleton.instance) {
@@ -20,9 +28,59 @@ class BLESingleton {
     this.lastConnectedDeviceId = null;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
-    this.listeners = {}; // { temperature: { subscription, callback }, ... }
-    this.onReconnectStatusChange = null;
-    this.onDisconnectCallback = null;
+    this.listeners = {}; // { temperature: { subscription, callback } }
+
+    // Callbacks
+    this.onDisconnectCallback = null; // Called when device disconnects
+    this.onReconnectCallback = null; // Called when device reconnects successfully
+    this.onReconnectStatusChange = null; // Called when reconnecting starts/ends
+    this.onReconnectFailure = null; // Called after 5 retry failures
+    this.onReconnectRetryCallback = null; // Called on each retry attempt
+    this.onConnectionStatusChange = null; // Called whenever connection status changes
+
+    // State
+    this.connectionStatus = BLESingleton.ConnectionStatus.DISCONNECTED;
+
+    // Reconnect control
+    this.isManualDisconnect = false;
+  }
+
+  // Callbacks setters
+  setOnDisconnectCallback(cb) {
+    this.onDisconnectCallback = cb;
+  }
+
+  setOnReconnectCallback(cb) {
+    this.onReconnectCallback = cb;
+  }
+
+  setReconnectStatusCallback(cb) {
+    this.onReconnectStatusChange = cb;
+  }
+
+  setOnReconnectFailure(cb) {
+    this.onReconnectFailure = cb;
+  }
+
+  setOnReconnectRetryCallback(cb) {
+    this.onReconnectRetryCallback = cb;
+  }
+
+  setConnectionStatusCallback(cb) {
+    this.onConnectionStatusChange = cb;
+  }
+
+  emitReconnectStatus(status) {
+    if (this.onReconnectStatusChange) {
+      this.onReconnectStatusChange(status);
+    }
+  }
+
+  emitConnectionStatus(status) {
+    this.connectionStatus = status;
+    if (this.onConnectionStatusChange) {
+      this.onConnectionStatusChange(status);
+    }
   }
 
   async requestPermissions() {
@@ -37,7 +95,6 @@ class BLESingleton {
 
   async scanForDevicesWithPrefix(prefix = 'Vayu_AQ', timeout = 5000) {
     await this.requestPermissions();
-
     return new Promise((resolve, reject) => {
       const filteredDevices = [];
 
@@ -62,6 +119,8 @@ class BLESingleton {
   }
 
   async connectToDevice(device) {
+    this.isManualDisconnect = false;
+    this.emitConnectionStatus(BLESingleton.ConnectionStatus.CONNECTING);
     try {
       this.device = await this.manager.connectToDevice(device.id, {
         autoConnect: true,
@@ -77,12 +136,12 @@ class BLESingleton {
           this.characteristics[c.uuid.toLowerCase()] = c;
         }
       }
-
-      console.log('Connected to:', this.device.name);
+      this.log(`Connected to: ${this.device.name}`);
       this.setupDisconnectListener();
+      this.emitConnectionStatus(BLESingleton.ConnectionStatus.CONNECTED);
     } catch (error) {
-      console.log('Connection error:', error.message);
-      Alert.alert('Connection Failed', error.message);
+      this.emitConnectionStatus(BLESingleton.ConnectionStatus.FAILED);
+      this.log(`Connection Failed: ${error.message}`);
       throw error;
     }
   }
@@ -94,8 +153,19 @@ class BLESingleton {
 
     this.disconnectSubscription = this.device.onDisconnected(
       async (error, device) => {
-        console.log('Device disconnected:', device.id);
-        Alert.alert('Device Disconnected', 'Attempting to reconnect...');
+        this.log(`Device disconnected: ${device.id}`);
+        this.emitConnectionStatus(BLESingleton.ConnectionStatus.DISCONNECTED);
+        this.emitReconnectStatus(true);
+
+        if (this.onDisconnectCallback) {
+          this.onDisconnectCallback(device);
+        }
+
+        if (this.isManualDisconnect) {
+          this.log('Manual disconnect, skipping auto-reconnect.');
+          return;
+        }
+
         this.reconnectAttempts = 0;
         this.autoReconnect(device.id);
       },
@@ -104,40 +174,61 @@ class BLESingleton {
 
   async autoReconnect(deviceId) {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      Alert.alert(
-        'Reconnect Failed',
-        'Unable to reconnect after multiple attempts.',
-      );
+      this.log(`Reconnect failed after ${this.reconnectAttempts} attempts.`);
+      this.emitReconnectStatus(false);
+      this.emitConnectionStatus(BLESingleton.ConnectionStatus.FAILED);
+
+      if (this.onReconnectFailure) {
+        this.onReconnectFailure(this.device);
+      }
       return;
     }
 
     try {
       this.reconnectAttempts++;
-      console.log(`Reconnect attempt ${this.reconnectAttempts}`);
-      const device = await this.manager.connectToDevice(deviceId, {
-        autoConnect: true,
-      });
-      this.device = device;
-      await this.device.discoverAllServicesAndCharacteristics();
+      this.emitConnectionStatus(BLESingleton.ConnectionStatus.RECONNECTING);
+      this.log(
+        `Reconnect attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts}`,
+      );
 
-      const services = await this.device.services();
-      for (const service of services) {
-        const chars = await service.characteristics();
-        for (const c of chars) {
-          this.characteristics[c.uuid.toLowerCase()] = c;
-        }
+      if (this.onReconnectRetryCallback) {
+        this.onReconnectRetryCallback(this.reconnectAttempts);
       }
 
-      console.log('Reconnected to:', device.name);
-      Alert.alert('Reconnected', `Successfully reconnected to ${device.name}`);
-      this.setupDisconnectListener();
-      this.reconnectAttempts = 0;
+      await this.connectAndDiscover(deviceId);
 
-      // ✅ Auto-resubscribe to all previous listeners
+      this.log(`Successfully reconnected to ${this.device.name}`);
+      this.emitReconnectStatus(false);
+      this.emitConnectionStatus(BLESingleton.ConnectionStatus.CONNECTED);
+
+      this.reconnectAttempts = 0;
+      this.setupDisconnectListener();
       this.resubscribeAll();
+
+      if (this.onReconnectCallback) {
+        this.onReconnectCallback(this.device);
+      }
     } catch (err) {
-      console.log('Reconnect failed:', err.message);
-      setTimeout(() => this.autoReconnect(deviceId), 3000);
+      this.log(`Retry ${this.reconnectAttempts} failed: ${err.message}`);
+      const delay = 2000;
+      setTimeout(() => this.autoReconnect(deviceId), delay);
+    }
+  }
+
+  async connectAndDiscover(deviceId) {
+    const device = await this.manager.connectToDevice(deviceId, {
+      autoConnect: true,
+    });
+    this.device = device;
+
+    await this.device.discoverAllServicesAndCharacteristics();
+
+    const services = await this.device.services();
+    for (const service of services) {
+      const chars = await service.characteristics();
+      for (const c of chars) {
+        this.characteristics[c.uuid.toLowerCase()] = c;
+      }
     }
   }
 
@@ -145,7 +236,7 @@ class BLESingleton {
     const keys = Object.keys(this.listeners);
     if (!keys.length) return;
 
-    console.log('Resubscribing to:', keys.join(', '));
+    this.log('Resubscribing to:', keys.join(', '));
 
     keys.forEach(characteristicName => {
       const { callback } = this.listeners[characteristicName];
@@ -174,7 +265,7 @@ class BLESingleton {
     const shortUuid = uuidMap[characteristicName];
 
     if (!shortUuid) {
-      console.warn('Unknown characteristic:', characteristicName);
+      this.log(`Unknown characteristic: ${characteristicName}`);
       return;
     }
 
@@ -183,7 +274,7 @@ class BLESingleton {
     );
 
     if (!matchedUUID) {
-      console.warn('Characteristic not found for:', characteristicName);
+      this.log(`Characteristic not found for: ${characteristicName}`);
       return;
     }
 
@@ -191,10 +282,7 @@ class BLESingleton {
 
     const subscription = characteristic.monitor((error, char) => {
       if (error) {
-        console.log(
-          `Notification error [${characteristicName}]:`,
-          error.message,
-        );
+        this.log(`Notification error [${characteristicName}]:`, error.message);
         return;
       }
 
@@ -204,7 +292,6 @@ class BLESingleton {
       callback(floatValue);
     });
 
-    // ✅ Store both subscription and callback
     this.listeners[characteristicName] = { subscription, callback };
   }
 
@@ -234,14 +321,16 @@ class BLESingleton {
   }
 
   async disconnect() {
+    this.isManualDisconnect = true; // Mark manual
     this.stopListeningAll();
+    this.emitConnectionStatus(BLESingleton.ConnectionStatus.DISCONNECTED);
 
     if (this.device) {
       try {
         await this.manager.cancelDeviceConnection(this.device.id);
-        console.log('Device manually disconnected');
+        this.log('Device manually disconnected');
       } catch (e) {
-        console.log('Error during manual disconnect:', e.message);
+        this.log('Error during manual disconnect:', e.message);
       }
       this.device = null;
     }
@@ -250,26 +339,24 @@ class BLESingleton {
       this.disconnectSubscription.remove();
       this.disconnectSubscription = null;
     }
+    this.characteristics = {};
   }
 
   async reconnectLastDevice() {
     if (this.lastConnectedDeviceId) {
+      this.isManualDisconnect = false;
       await this.connectToDevice({ id: this.lastConnectedDeviceId });
-      this.resubscribeAll(); // ✅ Also allow manual reconnect to restore listeners
-    } else {
-      Alert.alert('Reconnect Error', 'No previously connected device found.');
+      this.resubscribeAll();
+
+      if (this.onReconnectCallback) {
+        this.onReconnectCallback(this.device);
+      }
     }
   }
 
-  setReconnectStatusCallback(callback) {
-    this.onReconnectStatusChange = callback;
-  }
-
-  emitReconnectStatus(status) {
-    if (this.onReconnectStatusChange) {
-      this.onReconnectStatusChange(status);
-    }
+  log(...args) {
+    if (__DEV__) console.log('[BLE]', ...args);
   }
 }
-
+export { BLESingleton }; // <-- Add this line
 export default BLESingleton.getInstance();

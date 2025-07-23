@@ -6,7 +6,6 @@ export default {
   gradient_fade: require('./gradient_fade.png'),
   dummy_map: require('./dummy_map.png'),
   icon_cloud: require('./icon_cloud.png'),
-  icon_broadcasting: require('./icon_broadcasting.png'),
   icon_attachment: require('./icon_attachment.png'),
   icon_information: require('./icon_information.png'),
   icon_leaf: require('./icon_leaf.png'),
@@ -16,4 +15,6 @@ export default {
   icon_back: require('./icon_back.png'),
   dummy_graph: require('./dummy_graph.png'),
   vayu_logo: require('./vayu_logo.png'),
+  icon_start_broadcasting: require('./icon_start_broadcasting.png'),
+  icon_disconnect: require('./icon_disconnect.png'),
 };
