@@ -6,28 +6,86 @@ import { Text } from './';
 const Button = ({
   disabled,
   transparent,
-  backgroundColor = theme.colors.black1,
-  borderColor,
   small,
   onPress,
   iconName,
   tintColor,
   label,
   borderRadius = 30,
+  variant = 'solid',
+  disableColor,
+  bColor,
+  border_Width,
+  themedColor,
+  bgColor,
+  size = 'large',
+  buttonLabelStyle,
+  disableLabelColor,
 }) => {
+  const getBackgroundColorStyles = () => {
+    let backgroundColor =
+      variant === 'solid'
+        ? themedColor ?? theme.colors.black1
+        : bgColor ?? 'transpbarent';
+
+    let borderColor = bColor || borderColor || theme.colors.black1;
+
+    let borderWidth = variant === 'link' ? border_Width ?? 1.5 : border_Width;
+
+    if (disabled) {
+      backgroundColor =
+        variant === 'solid'
+          ? disableColor ?? theme.colors.secondary
+          : 'transparent';
+      borderColor =
+        variant === 'solid'
+          ? disableColor ?? theme.colors.secondaryLight
+          : variant === 'link'
+          ? theme.colors.secondary
+          : disableColor ?? theme.colors.secondary;
+    }
+
+    return {
+      backgroundColor,
+      borderColor,
+      borderWidth,
+    };
+  };
+
+  const containerStyle = [
+    {
+      borderRadius,
+      //   paddingHorizontal: theme.sizes.padding,
+      height: size === 'large' ? 48 : 40,
+      ...getBackgroundColorStyles(),
+    },
+  ];
+
+  const labelStyle = [
+    {
+      textAlign: 'center',
+      color:
+        variant === 'solid'
+          ? theme.colors.white
+          : variant === 'link'
+          ? themedColor ?? theme.colors.black1
+          : themedColor,
+      // flex: 1,
+    },
+    disabled && {
+      color: disableLabelColor ?? theme.colors.textSecondary,
+    },
+    buttonLabelStyle,
+  ];
+
   const styles = StyleSheet.create({
     container: {
       flexDirection: 'row',
       gap: 8,
-      backgroundColor: transparent ? 'transparent' : backgroundColor,
       paddingVertical: 5,
       paddingHorizontal: 10,
       justifyContent: 'center',
       alignItems: 'center',
-      borderRadius: borderRadius,
-      borderColor: borderColor,
-      borderWidth: transparent ? 1 : 0,
-      height: 58,
     },
     iconStyle: {
       height: theme.sizes.icons.lg,
@@ -38,7 +96,7 @@ const Button = ({
   return (
     <TouchableOpacity
       disabled={disabled}
-      style={styles.container}
+      style={[containerStyle, styles.container]}
       onPress={onPress}
       activeOpacity={0.8}
     >
@@ -52,9 +110,9 @@ const Button = ({
       )}
       <Text
         apfelGrotezkMittel
-        color="white"
+        // color="white"
         weight={theme.typography.fontWeights.medium}
-        // style={{ width: '80%' }}
+        style={labelStyle}
       >
         {label}
       </Text>

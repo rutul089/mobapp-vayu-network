@@ -3,6 +3,7 @@ import BLEService from '../../ble/BleService';
 import ScreenNames from '../../constants/ScreenNames';
 import { navigate } from '../../navigation/NavigationUtils';
 import BLE_DeviceList_Component from './BLE_DeviceList_Component';
+import { requestBluetoothAndLocationPermissions } from '../../helper/PermissionHelper';
 
 export default class BLEDeviceListScreen extends Component {
   constructor(props) {
@@ -14,8 +15,13 @@ export default class BLEDeviceListScreen extends Component {
     this.ble = BLEService;
   }
 
-  componentDidMount() {
-    this.scanDevices();
+  async componentDidMount() {
+    const granted = await requestBluetoothAndLocationPermissions();
+    if (granted) {
+      this.scanDevices();
+    } else {
+      // show some UI that permissions are needed
+    }
   }
   scanDevices = async () => {
     try {
@@ -43,6 +49,10 @@ export default class BLEDeviceListScreen extends Component {
     }
   };
 
+  restartBLEScan = () => {
+    this.scanDevices();
+  };
+
   render() {
     const { devices, scanning } = this.state;
     console.log('123123', devices);
@@ -52,6 +62,7 @@ export default class BLEDeviceListScreen extends Component {
           devices={devices}
           onDeviceSelected={this.connectToDevice}
           scanning={scanning}
+          restartBLEScan={this.restartBLEScan}
         />
       </>
     );

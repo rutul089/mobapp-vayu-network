@@ -10,6 +10,7 @@ import {
   SafeAreaWrapper,
   Stack,
   Text,
+  CommonModal,
 } from '../../components';
 import theme from '../../theme';
 
@@ -20,6 +21,9 @@ const AQI_Overview_Component = ({
   tempValue = '-',
   humidityValue = '-',
   connected,
+  onModalHide,
+  showReconnectModal,
+  onTryAgainPress,
 }) => {
   return (
     <SafeAreaWrapper
@@ -51,6 +55,26 @@ const AQI_Overview_Component = ({
           <HealthTip label={'Health Tip'} />
         </Stack>
       </ScrollView>
+      <CommonModal
+        isVisible={showReconnectModal}
+        onModalHide={onModalHide}
+        primaryButtonLabel={'Try Again'}
+        secondaryButtonText="Cancel"
+        isScrollableContent={true}
+        isPrimaryButtonVisible={true}
+        showSecondaryButton={true}
+        title="Device Disconnected"
+        isCancellable={false}
+        showCloseIcon={false}
+        onPressPrimaryButton={onTryAgainPress}
+        onSecondaryPress={onModalHide}
+      >
+        <Text textAlign="center">
+          {
+            'Connection lost with your device.\nWould you like to try reconnecting now?'
+          }
+        </Text>
+      </CommonModal>
     </SafeAreaWrapper>
   );
 };

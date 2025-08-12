@@ -17,4 +17,6 @@ export default {
   vayu_logo: require('./vayu_logo.png'),
   icon_start_broadcasting: require('./icon_start_broadcasting.png'),
   icon_disconnect: require('./icon_disconnect.png'),
+  icon_scan: require('./icon_scan.png'),
+  closeRound: require('./closeRound.png'),
 };

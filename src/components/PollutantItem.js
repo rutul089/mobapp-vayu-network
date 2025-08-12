@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#E5E5E5',
+    borderColor: theme.colors.borderColor1,
     borderRadius: 10,
     justifyContent: 'space-between',
   },
