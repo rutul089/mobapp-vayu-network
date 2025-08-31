@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { View, Text, Alert } from 'react-native';
-import AQI_Insight_Component from './AQI_Insight_Component';
-import { goBack, navigate } from '../../navigation/NavigationUtils';
+import { Alert } from 'react-native';
 import ScreenNames from '../../constants/ScreenNames';
-import BleService from '../../ble/BleService';
+import { goBack, navigate } from '../../navigation/NavigationUtils';
+import BleService from '../../services/ble/BleService';
+import AQI_Insight_Component from './AQI_Insight_Component';
 
 const characteristicMap = {
   '2a6e': 'Temperature',

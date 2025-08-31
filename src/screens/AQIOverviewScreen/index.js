@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { Alert } from 'react-native';
-import BleService, { BLESingleton } from '../../ble/BleService';
+import BleService, { BLESingleton } from '../../services/ble/BleService';
 import AQI_Overview_Component from './AQI_Overview_Component';
+import MQTTService from '../../services/MQTTService';
+import { getScreenParam } from '../../navigation/NavigationUtils';
 
 class AQIOverviewScreen extends Component {
   constructor(props) {
@@ -11,6 +13,7 @@ class AQIOverviewScreen extends Component {
       connected: false,
       reconnecting: false,
       showReconnectModal: false,
+      topicName: '',
     };
     this._characteristicMap = [
       'temperature',
@@ -24,20 +27,36 @@ class AQIOverviewScreen extends Component {
       'tvoc',
     ];
     this.mqttInterval = null;
-    this.mqttTopic = 'your/topic/for/readings'; // Replace with your actual topic
+    this.mqttTopic = null; // Replace with your actual topic
     this.hasSentInitialMQTT = false;
     this.mqttClient = null;
   }
 
   async componentDidMount() {
-    this.setupBLECallbacks();
-    this.mqttClient = true;
-    // this.mqttClient = mqtt.connect('mqtt://your-broker-url');
+    let navState = getScreenParam(this.props.route, 'params');
+    this.setState(
+      {
+        topicName: `VAYU_${navState?.id}`,
+      },
+      () => {
+        this.mqttTopic = `VAYU_${navState?.id}`;
+        this.setupBLECallbacks();
 
-    // this.mqttClient.on('connect', () => {
-    //   console.log('MQTT Connected');
-    // });
+        try {
+          this.mqtt = MQTTService.getInstance();
+          this.mqtt.connect(
+            'ws://mqtt.oizom.com:8083/mqtt',
+            'oizon',
+            '12345678',
+            this.handleMessage,
+          );
 
+          this.mqtt.subscribe(this.mqttTopic);
+        } catch (e) {
+          console.log('error', JSON.stringify(e));
+        }
+      },
+    );
     if (
       BleService.connectionStatus === BLESingleton.ConnectionStatus.CONNECTED
     ) {
@@ -56,7 +75,12 @@ class AQIOverviewScreen extends Component {
     BleService.setOnReconnectCallback(null);
 
     this.clearMQTTInterval();
+    this.mqtt.disconnect();
   }
+
+  handleMessage = (topic, message) => {
+    console.log(`MQTT Message from ${topic}:`, message);
+  };
 
   clearMQTTInterval = () => {
     if (this.mqttInterval) {
@@ -177,28 +201,30 @@ class AQIOverviewScreen extends Component {
   };
 
   onTryAgainPress = async () => {
-    this.setState({ reconnecting: true }); // optional loading state
-    try {
-      await BleService.restartBLEConnection();
-    } catch (e) {
-      console.log('Manual retry failed:', e);
-      this.setState({ reconnecting: false }); // optional loading state
-    }
+    this.setState({
+      showReconnectModal: false,
+    });
+    // this.setState({ reconnecting: true }); // optional loading state
+    // try {
+    //   await BleService.restartBLEConnection();
+    // } catch (e) {
+    //   console.log('Manual retry failed:', e);
+    //   this.setState({ reconnecting: false }); // optional loading state
+    // }
   };
 
   publishReadingsToMQTT = () => {
     const { readings } = this.state;
     if (Object.keys(readings).length === 0) return;
-    console.log('[Share]', JSON.stringify(readings));
-    return;
-    if (this.mqttClient && readings && Object.keys(readings).length > 0) {
-      const payload = JSON.stringify(readings);
-      try {
-        this.mqttClient.publish(this.mqttTopic, payload, 0, false);
-        console.log('MQTT Published:', payload);
-      } catch (e) {
-        console.log('MQTT publish error:', e.message);
-      }
+
+    const payload = JSON.stringify(readings);
+    console.log('[MQTT Publish]', payload);
+
+    try {
+      this.mqtt.publish(this.mqttTopic, payload);
+      console.log('MQTT Published:', payload);
+    } catch (e) {
+      console.log('MQTT publish error:', e.message);
     }
   };
 
