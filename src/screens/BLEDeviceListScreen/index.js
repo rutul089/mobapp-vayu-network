@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import BLEService from '../../services/ble/BleService';
 import ScreenNames from '../../constants/ScreenNames';
-import { navigate } from '../../navigation/NavigationUtils';
-import BLE_DeviceList_Component from './BLE_DeviceList_Component';
 import { requestBluetoothAndLocationPermissions } from '../../helper/PermissionHelper';
-import MQTTTestService from '../../services/MQTTTestService';
+import { navigate } from '../../navigation/NavigationUtils';
+import BLEService from '../../services/ble/BleService';
+import BLE_DeviceList_Component from './BLE_DeviceList_Component';
 
 export default class BLEDeviceListScreen extends Component {
   constructor(props) {
@@ -17,7 +16,6 @@ export default class BLEDeviceListScreen extends Component {
   }
 
   async componentDidMount() {
-    this.checkConnection();
     const granted = await requestBluetoothAndLocationPermissions();
     if (granted) {
       this.scanDevices();
@@ -54,27 +52,6 @@ export default class BLEDeviceListScreen extends Component {
   restartBLEScan = () => {
     this.scanDevices();
   };
-  // mqtt.oizom.com
-  // mqtts://test.mosquitto.org:8883
-  async checkConnection() {
-    MQTTTestService.connect(
-      'mqtts://test.mosquitto.org:8883',
-      'oizom',
-      '12345678',
-    )
-      .then(() => {
-        this.setState({ connected: true });
-        MQTTTestService.subscribe('test/topic'); // Example topic
-        MQTTTestService.publish('test/topic', 'Hello from RN 🚀');
-      })
-      .catch(err => {
-        console.log('MQTT Connection Failed:', err);
-      });
-  }
-
-  sendMessage = () => {
-    MQTTTestService.publish('test/topic', 'Hello from React Native!');
-  };
 
   render() {
     const { devices, scanning } = this.state;
@@ -85,7 +62,7 @@ export default class BLEDeviceListScreen extends Component {
           devices={devices}
           onDeviceSelected={this.connectToDevice}
           scanning={scanning}
-          restartBLEScan={this.sendMessage}
+          restartBLEScan={this.restartBLEScan}
         />
       </>
     );

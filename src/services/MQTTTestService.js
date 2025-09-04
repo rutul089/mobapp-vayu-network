@@ -3,14 +3,23 @@ import MQTT from 'sp-react-native-mqtt';
 class MQTTTestService {
   client = null;
 
-  connect(brokerUrl, username, password, clientId = `mqtt-explorer-8063b52a`) {
+  connect(
+    brokerUrl,
+    username,
+    password,
+    clientId = `vayu-network-${Math.random().toString(16).substr(2, 8)}`,
+  ) {
     return new Promise((resolve, reject) => {
+      if (this.client) {
+        console.log('⚠️ Already connected, skipping new connection');
+        return resolve();
+      }
       MQTT.createClient({
         uri: brokerUrl, // e.g., 'mqtt://mqtt.oizom.com:1883'
-        clientId: `rn-client-${Math.random().toString(16).substr(2, 8)}`,
-        user: 'oizom',
-        pass: '12345678',
-        clean: false,
+        clientId: clientId,
+        user: username,
+        pass: password,
+        clean: true,
         keepalive: 60,
       })
         .then(client => {
@@ -18,10 +27,12 @@ class MQTTTestService {
 
           client.on('closed', () => {
             console.log('🔌 MQTT disconnected');
+            this.client = null;
           });
 
           client.on('error', err => {
             console.log('❌ MQTT error:', err);
+            this.client = null;
             reject(err);
           });
 
@@ -57,6 +68,7 @@ class MQTTTestService {
   disconnect() {
     if (this.client) {
       this.client.disconnect();
+      this.client = null;
       console.log('🔌 MQTT disconnected manually');
     }
   }
