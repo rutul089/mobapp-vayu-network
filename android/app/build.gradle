@@ -85,6 +85,10 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/io.netty.versions.properties'
+    }
     signingConfigs {
         debug {
             storeFile file('debug.keystore')

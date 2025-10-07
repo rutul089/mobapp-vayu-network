@@ -5,6 +5,7 @@ import AQI_Overview_Component from './AQI_Overview_Component';
 import { getScreenParam } from '../../navigation/NavigationUtils';
 import MQTTTestService from '../../services/MQTTTestService';
 import Constants from '../../constants/Constants';
+import { generateFluxId } from '../../helper/Utils';
 
 class AQIOverviewScreen extends Component {
   constructor(props) {
@@ -37,7 +38,7 @@ class AQIOverviewScreen extends Component {
     this.setState(
       {
         topicName: 'flux',
-        vayu_id: `VAYU_${navState?.id || 'UNKNOWN'}`,
+        vayu_id: generateFluxId(navState?.id) || 'UNKNOWN',
       },
       async () => {
         await this.checkConnection();
@@ -79,11 +80,7 @@ class AQIOverviewScreen extends Component {
 
   async checkConnection() {
     try {
-      await MQTTTestService.connect(
-        Constants.MQTT.SECURE_BROKER,
-        Constants.MQTT.USERNAME,
-        Constants.MQTT.PASSWORD,
-      );
+      await MQTTTestService.connect(Constants.MQTT.SECURE_BROKER, '', '');
 
       console.log('✅ MQTT Connected');
       this.setState({ connected: true });
@@ -147,8 +144,10 @@ class AQIOverviewScreen extends Component {
           () => {
             // Immediately publish the first time (optional guard inside)
             if (!this.hasSentInitialMQTT) {
-              this.publishReadingsToMQTT();
-              this.hasSentInitialMQTT = true;
+              setTimeout(() => {
+                this.publishReadingsToMQTT();
+                this.hasSentInitialMQTT = true;
+              }, 1500);
             }
           },
         );
@@ -222,9 +221,17 @@ class AQIOverviewScreen extends Component {
     if (Object.keys(readings).length === 0) return;
 
     const payload = JSON.stringify({
-      id: vayu_id, // <-- you can replace this with navState?.id or any device ID
+      deviceId: vayu_id, // <-- you can replace this with navState?.id or any device ID
       timestamp: new Date().toISOString(),
-      ...readings,
+      latitude: '23.0332',
+      longitude: '72.6168',
+      temp: readings?.temperature,
+      hum: readings?.humidity,
+      pr: readings?.pressure,
+      v2: readings?.tvoc,
+      p3: readings?.pm1,
+      p1: readings?.pm25,
+      p2: readings?.pm10,
     });
 
     try {
